@@ -1,0 +1,874 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>MAGem VideoLab — Sliding Buffer v1.0</title>
+<style>
+:root{--bg:#0d0f12;--panel:#171a1f;--line:#3b4149;--text:#f2f3f5;--muted:#aeb5bf;--accent:#d9dce1}
+*{box-sizing:border-box}
+body{font-family:system-ui,sans-serif;margin:0;background:var(--bg);color:var(--text)}
+header{background:#15181c;color:#fff;padding:12px 14px;border-bottom:1px solid #30343a;position:sticky;top:0;z-index:20}
+header h1{margin:0;font-size:22px;line-height:1.15}
+header .small{margin-top:4px}
+main{
+  max-width:1100px;
+  margin:auto;
+  padding:10px;
+  width:100%;
+  height:calc(100dvh - 48px);
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;margin:9px 0}
+.small{font-size:13px;color:var(--muted)}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+button,input,select{font:inherit}
+button{padding:9px 12px;margin:2px;border:1px solid #646b74;border-radius:9px;background:#191c21;color:var(--text);
+user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none;-webkit-tap-highlight-color:transparent}
+button.flash{background:#59606a}
+button.active{font-weight:700;border-width:2px}
+button.tool{min-width:44px}
+input[type=number]{width:92px;background:#111418;color:#fff;border:1px solid #5d646d;border-radius:8px;padding:7px}
+#info{white-space:pre-wrap;line-height:1.35}
+#status{white-space:pre-wrap;margin-top:7px}
+#bufferInfo{font-family:monospace;white-space:pre-wrap}
+.compactHeader{
+  padding:8px 12px;
+}
+.compactHeader h1{
+  margin:0;
+  font-size:20px;
+  line-height:1.1;
+}
+.fileLabel{
+  display:block;
+  font-weight:700;
+  margin-bottom:5px;
+}
+.filePanel input[type=file]{
+  width:100%;
+}
+.internalStatus{
+  display:none !important;
+  position:absolute;
+  width:0;
+  height:0;
+  overflow:hidden;
+}
+.player{padding:0;overflow:hidden;background:#000}
+#canvasWrap{
+  position:relative;
+  background:#000;
+  overflow:hidden;
+  touch-action:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:58vh;
+  min-height:260px;
+  max-height:620px;
+}
+#canvas{
+  display:block;
+  width:100%;
+  height:100%;
+  min-height:0;
+  object-fit:contain;
+  background:#000;
+}
+#frameOverlay{position:absolute;left:8px;top:8px;padding:5px 8px;border-radius:7px;background:rgba(0,0,0,.62);font:14px ui-monospace,monospace;color:#fff;pointer-events:none}
+#timeline{
+  width:100%;
+  margin:3px 0 0;
+  height:14px;
+  accent-color:#cfd3d8;
+}
+.timelineLabels{display:flex;justify-content:space-between;font:12px ui-monospace,monospace;color:var(--muted)}
+.controlsCard{
+  flex:0 0 auto;
+  padding:5px 8px 7px;
+}
+.timelineCompact{
+  margin-bottom:5px;
+}
+.mainTransport{
+  gap:6px;
+}
+.mainTransport button{
+  min-width:82px;
+}
+.speedTransport{
+  gap:5px;
+  margin-top:5px;
+}
+.speedTransport button{
+  min-width:52px;
+  padding:6px 8px;
+}
+.zoomTransport{
+  gap:5px;
+  margin-top:5px;
+}
+.zoomTransport button{
+  min-width:52px;
+  padding:6px 8px;
+}
+.zoomTransport #zoomReadout{
+  min-width:48px;
+}
+.transport{justify-content:center}
+.transport button{min-width:74px}
+#zoomReadout{min-width:58px;text-align:center;font-family:ui-monospace,monospace}
+.toolgroup{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.sectionTitle{font-weight:700;margin-bottom:7px}
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:6px;color:var(--muted);font-size:13px}
+.note{border-left:3px solid #707780;padding-left:9px}
+@media (max-width:600px){
+  main{padding:7px}
+  .card{padding:9px}
+  header h1{font-size:19px}
+  button{padding:9px 10px}
+  .transport button{min-width:62px}
+
+  main{
+    height:calc(100dvh - 43px);
+    padding:5px;
+  }
+  #canvasWrap{
+    flex:1 1 auto;
+    min-height:0;
+  }
+}
+
+.header{
+  display:flex !important;
+  flex-direction:row !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  flex-wrap:nowrap !important;
+  gap:8px;
+  padding:5px 8px;
+  width:100%;
+  box-sizing:border-box;
+}
+.headerFile{
+  display:flex !important;
+  flex:0 0 auto !important;
+  align-items:center;
+  position:relative;
+  z-index:5;
+  margin:0 !important;
+}
+.headerFile input[type="file"]{
+  position:absolute;
+  width:1px;
+  height:1px;
+  opacity:0;
+  pointer-events:auto;
+}
+.fileBtn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:28px;
+  padding:3px 8px;
+  border:1px solid #bbb;
+  border-radius:7px;
+  background:#f4f4f4;
+  color:#222;
+  font-size:12px;
+  cursor:pointer;
+  white-space:nowrap;
+}
+
+</style>
+</head>
+<body>
+<header class="header">
+  <h1>MAGem VideoLab</h1>
+  <div class="headerFile">
+    <input id="file" type="file" accept="video/mp4,video/*">
+    <label for="file" class="fileBtn">Scegli video</label>
+  </div>
+</header>
+
+<main>
+<button id="an" type="button" aria-hidden="true" tabindex="-1" style="display:none">Analizza video</button>
+
+
+
+
+<div id="info" style="display:none"></div>
+
+<div class="card player">
+  <div id="canvasWrap">
+    <canvas id="canvas"></canvas>
+    <div id="frameOverlay">Frame — · —</div>
+  </div>
+</div>
+
+<div class="card controlsCard">
+  <div class="timelineCompact">
+    <input id="timeline" type="range" disabled min="0" max="0" value="0" step="1">
+    <div class="timelineLabels">
+      <span id="timeStart">0.000 s</span>
+      <span id="timeCenter">Frame —</span>
+      <span id="timeEnd">0.000 s</span>
+    </div>
+  </div>
+  <div class="row transport mainTransport">
+    <button id="prev" title="Indietro di un frame">◀ Frame</button>
+    <button id="play">▶ Play</button>
+    <button id="next" title="Avanti di un frame">Frame ▶</button>
+  </div>
+  <div class="row transport speedTransport">
+    <button data-speed="0.25">¼×</button>
+    <button data-speed="0.5">½×</button>
+    <button data-speed="1">1×</button>
+    <button data-speed="2">2×</button>
+  </div>
+  <div class="row transport zoomTransport">
+    <button id="zoomOut" class="tool" title="Riduci zoom">−</button>
+    <span id="zoomReadout">100%</span>
+    <button id="zoomIn" class="tool" title="Aumenta zoom">+</button>
+    <button id="zoomReset">Reset vista</button>
+  </div>
+</div>
+
+
+
+
+
+<div id="status" class="internalStatus" aria-hidden="true">Pronto.</div>
+<div id="bufferInfo" class="internalStatus" aria-hidden="true">Buffer: —</div>
+
+
+
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/mp4box@0.5.2/dist/mp4box.all.min.js"></script>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+
+let fileObj=null,fileBuf=null,mp4=null,track=null,samples=[],timescale=0,total=0;
+let codec="",description=null,rotation=0,config=null;
+
+let decoder=null;
+let decodeCursor=-1;
+let decodeLock=false;
+let current=-1;
+let playing=false,playToken=0,speed=1;
+let navigationPromise=null;
+let navigationResolve=null;
+
+// Stato della vista: indipendente dal decoder e dal buffer.
+let zoom=1, panX=0, panY=0, dragging=false, dragX=0, dragY=0, lastTap=0;
+
+const frameBuffer=new Map(); // frame index -> ImageBitmap
+const outputPromises=new Map();
+
+const INITIAL_WINDOW=60;
+const BACKFILL_SIZE=30;
+const LOW_WATERMARK=20;
+const MAX_BUFFER=100;
+
+let holdDelta=0,holdTimer=null,holdRAF=null,holdStarted=0;
+let navigationToken=0;
+let requestedTarget=null;
+let navigationBusy=false;
+let backfillBusy=false;
+let protectedFrame=null;
+
+const isSync=s=>typeof s.is_sync==="boolean"?s.is_sync:!!s.is_rap;
+const ts=s=>Math.round(Number(s.cts)*1e6/timescale);
+
+function flash(b){b.classList.add("flash");setTimeout(()=>b.classList.remove("flash"),100)}
+function matrixValue(m,i){return Number(m?.[String(i)]??m?.[i])}
+function detectRotation(tr){
+  const m=tr?.tkhd?.matrix;if(!m)return 0;
+  const a=matrixValue(m,0),b=matrixValue(m,1),c=matrixValue(m,3),d=matrixValue(m,4),e=.2;
+  if(Math.abs(a)<e&&Math.abs(d)<e){if(b>0&&c<0)return 90;if(b<0&&c>0)return 270}
+  if(a<0&&d<0)return 180;return 0;
+}
+function getDescription(tr){
+  const entry=tr?.mdia?.minf?.stbl?.stsd?.entries?.[0];
+  const box=entry&&(entry.hvcC||entry.avcC||entry.vpcC||entry.av1C);
+  if(!box)return null;
+  const ds=new DataStream(undefined,0,DataStream.BIG_ENDIAN);box.write(ds);
+  const u=new Uint8Array(ds.buffer,0,ds.position);
+  return u.length>8?u.slice(8):null;
+}
+function sampleChunk(i){
+  const s=samples[i];
+  return new EncodedVideoChunk({
+    type:isSync(s)?"key":"delta",
+    timestamp:ts(s),
+    duration:Math.round(Number(s.duration)*1e6/timescale),
+    data:new Uint8Array(fileBuf,Number(s.offset),Number(s.size))
+  });
+}
+function update(n){
+  current=n;
+  $("current") && ($("current").textContent=n);
+  const seconds=ts(samples[n])/1e6;
+  $("time") && ($("time").textContent=seconds.toFixed(6)+" s");
+  const tl=$("timeline");
+  if(tl){
+    tl.max=Math.max(0,total-1);
+    tl.value=n;
+    tl.disabled=true;
+  }
+  $("frameOverlay").textContent=`Frame ${n} / ${Math.max(0,total-1)} · ${seconds.toFixed(3)} s`;
+  $("timeCenter").textContent=`Frame ${n} · ${seconds.toFixed(3)} s`;
+  updateBufferInfo();
+}
+function trimFrameBuffer(){
+  if(!samples.length)return;
+  // Manteniamo un buffer limitato, ma durante una navigazione
+  // il frame richiesto è "protetto": non deve essere espulso
+  // prima che possa diventare il frame corrente.
+  while(frameBuffer.size>MAX_BUFFER){
+    const keys=[...frameBuffer.keys()];
+    let victim=null;
+
+    const behind=keys.filter(k=>k<current && k!==protectedFrame).sort((a,b)=>a-b);
+    if(behind.length) victim=behind[0];
+    else{
+      const ahead=keys.filter(k=>k>current && k!==protectedFrame).sort((a,b)=>b-a);
+      if(ahead.length) victim=ahead[0];
+    }
+
+    if(victim===null)break;
+    const b=frameBuffer.get(victim);
+    try{b.close()}catch(e){}
+    frameBuffer.delete(victim);
+  }
+}
+function updateBufferInfo(){
+  if(!samples.length){$("bufferInfo").textContent="Buffer: —";return}
+  trimFrameBuffer();
+  const keys=[...frameBuffer.keys()].sort((a,b)=>a-b);
+  const first=keys.length?keys[0]:"—";
+  const last=keys.length?keys[keys.length-1]:"—";
+  $("bufferInfo").textContent=
+    `Buffer: ${keys.length} frame | ${first}→${last} | decodeCursor=${decodeCursor} | MAX=${MAX_BUFFER}`;
+}
+function drawBitmap(bitmap){
+  const w=bitmap.width,h=bitmap.height;
+  const canvas=$("canvas");
+  if(rotation%180){canvas.width=h;canvas.height=w}
+  else{canvas.width=w;canvas.height=h}
+
+  const ctx=canvas.getContext("2d");
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.save();
+  ctx.translate(canvas.width/2+panX,canvas.height/2+panY);
+  ctx.rotate(rotation*Math.PI/180);
+  ctx.scale(zoom,zoom);
+  ctx.drawImage(bitmap,-w/2,-h/2);
+  ctx.restore();
+  updateZoomUI();
+}
+function updateZoomUI(){
+  const z=$("zoomReadout");
+  if(z)z.textContent=Math.round(zoom*100)+"%";
+}
+function resetView(){
+  zoom=1;panX=0;panY=0;
+  if(frameBuffer.has(current))drawBitmap(frameBuffer.get(current));
+  updateZoomUI();
+}
+function setZoom(next){
+  zoom=Math.max(1,Math.min(5,next));
+  if(zoom===1){panX=0;panY=0}
+  if(frameBuffer.has(current))drawBitmap(frameBuffer.get(current));
+}
+function clampPan(){
+  const c=$("canvas");
+  if(!c)return;
+  const maxX=Math.max(0,c.width*(zoom-1)/2);
+  const maxY=Math.max(0,c.height*(zoom-1)/2);
+  panX=Math.max(-maxX,Math.min(maxX,panX));
+  panY=Math.max(-maxY,Math.min(maxY,panY));
+}
+function canvasPointerDown(e){
+  if(!samples.length)return;
+  dragging=true;
+  dragX=e.clientX;dragY=e.clientY;
+  try{$("canvasWrap").setPointerCapture(e.pointerId)}catch(_){}
+}
+function canvasPointerMove(e){
+  if(!dragging)return;
+  panX += e.clientX-dragX;
+  panY += e.clientY-dragY;
+  dragX=e.clientX;dragY=e.clientY;
+  clampPan();
+  if(frameBuffer.has(current))drawBitmap(frameBuffer.get(current));
+}
+function canvasPointerUp(){
+  dragging=false;
+}
+function canvasDoubleTap(){
+  resetView();
+}
+
+function closeDecoder(){
+  if(decoder){try{decoder.close()}catch(e){}}
+  decoder=null;
+  decodeCursor=-1;
+  outputPromises.clear();
+}
+function clearFrameBuffer(){
+  for(const b of frameBuffer.values()){try{b.close()}catch(e){}}
+  frameBuffer.clear();
+  updateBufferInfo();
+}
+function waitForDecodeIdle(timeout=12000){
+  const t0=performance.now();
+  return new Promise((resolve,reject)=>{
+    const tick=()=>{
+      if(!decodeLock){resolve();return}
+      if(performance.now()-t0>timeout){
+        reject(Error("Timeout attesa fine decodifica precedente."));
+        return;
+      }
+      setTimeout(tick,5);
+    };
+    tick();
+  });
+}
+function waitForFrame(i,timeout=8000){
+  if(frameBuffer.has(i))return Promise.resolve(frameBuffer.get(i));
+  const t0=performance.now();
+  return new Promise((resolve,reject)=>{
+    const tick=()=>{
+      if(frameBuffer.has(i)){resolve(frameBuffer.get(i));return}
+      if(performance.now()-t0>timeout){
+        reject(Error(`Timeout attesa frame ${i}. Buffer=${frameBuffer.size}, decodeCursor=${decodeCursor}`));
+        return;
+      }
+      setTimeout(tick,5);
+    };
+    tick();
+  });
+}
+async function ensureDecoder(){
+  if(decoder)return;
+  const support=await VideoDecoder.isConfigSupported(config);
+  if(!support.supported)throw Error("VideoDecoder non supportato.");
+  decoder=new VideoDecoder({
+    output(frame){
+      const indexByTs=tsToIndex.get(Number(frame.timestamp));
+      if(indexByTs===undefined){frame.close();return}
+      createImageBitmap(frame).then(bitmap=>{
+        const old=frameBuffer.get(indexByTs);
+        if(old)try{old.close()}catch(e){}
+        frameBuffer.set(indexByTs,bitmap);
+        trimFrameBuffer();
+        updateBufferInfo();
+      }).catch(e=>{
+        $("status").textContent="Errore ImageBitmap: "+e.message;
+      }).finally(()=>{try{frame.close()}catch(e){}});
+    },
+    error(e){
+      $("status").textContent="ERRORE decoder: "+(e?.message||e);
+    }
+  });
+  decoder.configure(support.config);
+}
+let tsToIndex=new Map();
+
+async function decodeRangeForward(end){
+  end=Math.min(end,total-1);
+  if(decodeLock)await waitForDecodeIdle();
+  if(decodeCursor>=end)return;
+  decodeLock=true;
+  try{
+    await ensureDecoder();
+    const start=Math.max(0,decodeCursor+1);
+    for(let i=start;i<=end;i++){
+      decoder.decode(sampleChunk(i));
+      decodeCursor=i;
+    }
+    // Give the decoder a short scheduling window; no flush.
+    await new Promise(r=>setTimeout(r,0));
+  }finally{decodeLock=false}
+}
+async function seekReset(target,end){
+  target=Math.max(0,Math.min(target,total-1));
+  end=Math.max(target,Math.min(end,total-1));
+
+  await waitForDecodeIdle();
+
+  protectedFrame=target;
+  closeDecoder();
+  clearFrameBuffer();
+  await ensureDecoder();
+
+  let start=target;
+  while(start>0&&!isSync(samples[start]))start--;
+
+  decodeCursor=start-1;
+  for(let i=start;i<=end;i++){
+    decoder.decode(sampleChunk(i));
+    decodeCursor=i;
+  }
+  await waitForFrame(target,10000);
+}
+async function prepareInitial(){
+  clearFrameBuffer();
+  closeDecoder();
+  await ensureDecoder();
+  let end=Math.min(total-1,INITIAL_WINDOW);
+  let start=0;
+  while(start>0&&!isSync(samples[start]))start--;
+  decodeCursor=start-1;
+  for(let i=start;i<=end;i++){
+    decoder.decode(sampleChunk(i));
+    decodeCursor=i;
+  }
+  await waitForFrame(0,10000);
+  $("status").textContent=`Pronto: frame 0. Buffer iniziale in caricamento…`;
+}
+async function ensureAhead(target){
+  target=Math.min(target,total-1);
+  if(frameBuffer.has(target))return;
+
+  if(target>decodeCursor){
+    await decodeRangeForward(Math.min(total-1,target+BACKFILL_SIZE));
+    await waitForFrame(target,10000);
+    return;
+  }
+
+  await seekReset(target,Math.min(total-1,target+BACKFILL_SIZE));
+}
+async function maybeBackfill(){
+  if(!samples.length||backfillBusy||decodeLock)return;
+  const ahead=[];
+  for(let i=current+1;i<=Math.min(total-1,decodeCursor);i++){
+    if(frameBuffer.has(i))ahead.push(i);
+  }
+  if(ahead.length<=LOW_WATERMARK && decodeCursor<total-1){
+    backfillBusy=true;
+    try{
+      const end=Math.min(total-1,decodeCursor+BACKFILL_SIZE);
+      await decodeRangeForward(end);
+    }finally{backfillBusy=false}
+  }
+}
+async function showFrame(n){
+  n=Math.max(0,Math.min(n,total-1));
+  protectedFrame=n;
+  $("status").textContent=`Caricamento frame ${n}…`;
+
+  try{
+    await ensureAhead(n);
+    const bitmap=await waitForFrame(n,10000);
+    drawBitmap(bitmap);
+    update(n);
+    $("status").textContent=`Frame ${n} caricato.`;
+  }finally{
+    // Una volta che current è aggiornato, il normale trim può riprendere.
+    protectedFrame=null;
+  }
+
+  void maybeBackfill();
+}
+async function navigationLoop(){
+  if(navigationBusy || !samples.length)return;
+
+  navigationBusy=true;
+  let ok=false;
+
+  try{
+    while(requestedTarget!==null){
+      const target=requestedTarget;
+      requestedTarget=null;
+
+      if(target!==current){
+        await showFrame(target);
+      }
+
+      // Una richiesta può essere considerata conclusa SOLO quando
+      // il frame richiesto è effettivamente quello visualizzato.
+      if(current===target){
+        ok=true;
+      }
+    }
+  }catch(e){
+    $("status").textContent="ERRORE navigazione: "+e.message;
+    ok=false;
+  }finally{
+    navigationBusy=false;
+
+    if(requestedTarget!==null)void navigationLoop();
+  }
+}
+function requestNavigation(target){
+  if(!samples.length)return Promise.resolve(false);
+  target=Math.max(0,Math.min(target,total-1));
+  requestedTarget=target;
+  void navigationLoop();
+
+  // Se il frame è già visualizzato, la richiesta è immediatamente soddisfatta.
+  if(current===target && !navigationBusy && requestedTarget===null){
+    return Promise.resolve(true);
+  }
+
+  // Attesa reale: non dipende da navigationBusy e non può terminare
+  // prima che current sia effettivamente arrivato al target.
+  return new Promise(resolve=>{
+    const started=performance.now();
+    const timeout=12000;
+
+    const wait=()=>{
+      if(!samples.length){
+        resolve(false);
+        return;
+      }
+      if(current===target && requestedTarget===null && !navigationBusy){
+        resolve(true);
+        return;
+      }
+      if(performance.now()-started>timeout){
+        resolve(false);
+        return;
+      }
+      requestAnimationFrame(wait);
+    };
+    requestAnimationFrame(wait);
+  });
+}
+function requestStep(delta){
+  if(!samples.length)return;
+  const base=requestedTarget!==null?requestedTarget:(current<0?0:current);
+  requestNavigation(base+delta);
+}
+async function playLoop(my){
+  if(!playing||my!==playToken)return;
+  const n=current<0?0:current+1;
+  if(n>=total){
+    playing=false;$("play").textContent="▶ Play";$("status").textContent="Fine video.";return;
+  }
+  const t0=performance.now();
+  await showFrame(n);
+  if(!playing||my!==playToken)return;
+  const mediaDelta=(ts(samples[n])-ts(samples[n-1]))/1000;
+  const delay=Math.max(0,mediaDelta/speed-(performance.now()-t0));
+  setTimeout(()=>playLoop(my),delay);
+}
+function startHold(delta,button){
+  if(!samples.length)return;
+  stopHold();
+
+  // Prev/Next diventano una modalità di navigazione separata dalla
+  // riproduzione: alla pressione il video va sempre in pausa.
+  if(playing){
+    playing=false;
+    playToken++;
+    $("play").textContent="▶ Play";
+    $("status").textContent="Pausa — navigazione frame.";
+  }
+
+  holdDelta=delta;
+  holdStarted=performance.now();
+
+  // Primo passo: esattamente un frame.
+  requestStep(delta);
+
+  holdTimer=setTimeout(()=>{
+    let lastRequest=0;
+
+    const tick=(now)=>{
+      if(!holdDelta)return;
+
+      const held=now-holdStarted;
+
+      // Più a lungo si tiene premuto, maggiore è il salto.
+      // Manteniamo comunque il primo tratto lento e preciso.
+      let step=1;
+      let interval=55;
+
+      if(held>=900){
+        step=2;
+        interval=50;
+      }
+      if(held>=1800){
+        step=4;
+        interval=45;
+      }
+      if(held>=3000){
+        step=8;
+        interval=40;
+      }
+      if(held>=5000){
+        step=12;
+        interval=35;
+      }
+
+      if(now-lastRequest>=interval){
+        requestStep(holdDelta*step);
+        lastRequest=now;
+      }
+
+      holdRAF=requestAnimationFrame(tick);
+    };
+
+    holdRAF=requestAnimationFrame(tick);
+  },350);
+}
+function stopHold(){
+  clearTimeout(holdTimer);holdTimer=null;
+  if(holdRAF)cancelAnimationFrame(holdRAF);
+  holdRAF=null;holdDelta=0;
+}
+document.addEventListener("selectstart",e=>{
+  if(e.target.closest&&e.target.closest("button"))e.preventDefault();
+});
+document.addEventListener("contextmenu",e=>{
+  if(e.target.closest&&e.target.closest("button"))e.preventDefault();
+});
+
+$("file").addEventListener("change",()=>{
+  const file=$("file").files[0];
+  if(!file)return;
+  $("an").click();
+});
+$("an").onclick=async()=>{
+  const file=$("file").files[0];
+  if(!file){$("status").textContent="Seleziona un video.";return}
+  stopHold();playing=false;playToken++;
+  closeDecoder();clearFrameBuffer();
+  $("status").textContent="Analisi…";
+  try{
+    fileObj=file;
+    fileBuf=await file.arrayBuffer();fileBuf.fileStart=0;
+    mp4=MP4Box.createFile();
+    mp4.onReady=async info=>{
+      const vt=info.videoTracks?.[0];
+      if(!vt)throw Error("Nessuna traccia video.");
+      track=mp4.getTrackById(vt.id);
+      samples=track.samples||[];
+      total=samples.length;
+      timescale=Number(vt.timescale||track.timescale);
+      description=getDescription(track);
+      if(!description)throw Error("hvcC non trovato.");
+      config={
+        codec:vt.codec,
+        codedWidth:Number(vt.video?.width||1920),
+        codedHeight:Number(vt.video?.height||1080),
+        description
+      };
+      const ok=await VideoDecoder.isConfigSupported(config);
+      if(!ok.supported)throw Error("HEVC non supportato.");
+      rotation=detectRotation(track);
+      tsToIndex=new Map();
+      for(let i=0;i<samples.length;i++)tsToIndex.set(ts(samples[i]),i);
+
+      // Aggiorna i limiti temporali della timeline.
+      // Il tempo non viene ricavato da un FPS presunto, ma dai PTS/CTS
+      // reali dei sample MP4 già indicizzati.
+      if(total){
+        const startSec=ts(samples[0])/1e6;
+        const endSec=ts(samples[total-1])/1e6;
+        $("timeStart").textContent=startSec.toFixed(3)+" s";
+        $("timeEnd").textContent=endSec.toFixed(3)+" s";
+        $("timeCenter").textContent="Frame 0";
+      }
+
+      $("info").textContent=
+        `File: ${file.name}\nCodec: ${vt.codec}\n`+
+        `Risoluzione: ${config.codedWidth} × ${config.codedHeight}\n`+
+        `Sample: ${total}\nTimescale: ${timescale}\n`+
+        `hvcC: ${description.byteLength} byte\nRotazione: ${rotation}°`;
+      await prepareInitial();
+      $("status").textContent="Pronto. Usa Prev/Next per navigare; tieni premuto per accelerare.";
+      await showFrame(0);
+    };
+    mp4.onError=e=>{$("status").textContent="MP4Box: "+e};
+    mp4.appendBuffer(fileBuf);mp4.flush();
+  }catch(e){$("status").textContent="ERRORE: "+e.message}
+};
+
+$("play").onclick=async()=>{
+  flash($("play"));
+  if(!samples.length)return;
+
+  if(playing){
+    playing=false;playToken++;
+    $("play").textContent="▶ Play";
+    $("status").textContent="Pausa.";
+    return;
+  }
+
+  const target = requestedTarget!==null
+    ? requestedTarget
+    : Number($("timeline").value);
+
+  // Se la posizione scelta non è ancora realmente visualizzata,
+  // aspettiamo senza richiedere un secondo click.
+  if(current!==target || requestedTarget!==null || navigationBusy){
+    $("status").textContent=`Posizionamento al frame ${target}…`;
+    const ok=await requestNavigation(target);
+
+    if(!samples.length || !ok || current!==target){
+      $("play").textContent="▶ Play";
+      return;
+    }
+  }
+
+  playing=true;
+  playToken++;
+  $("play").textContent="❚❚ Pausa";
+  $("status").textContent=`Play dal frame ${current}.`;
+  playLoop(playToken);
+};
+$("next").addEventListener("pointerdown",e=>{
+  e.preventDefault();startHold(+1,$("next"));
+});
+$("prev").addEventListener("pointerdown",e=>{
+  e.preventDefault();startHold(-1,$("prev"));
+});
+["next","prev"].forEach(id=>{
+  $(id).addEventListener("pointerup",stopHold);
+  $(id).addEventListener("pointercancel",stopHold);
+  $(id).addEventListener("pointerleave",stopHold);
+});
+document.querySelectorAll("button[data-speed]").forEach(b=>{
+  b.onclick=()=>{
+    speed=Number(b.dataset.speed);
+    document.querySelectorAll("button[data-speed]").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+  };
+});
+document.querySelector('button[data-speed="1"]').classList.add("active");
+
+// Timeline: il trascinamento modifica la posizione solo al rilascio/change,
+// evitando di bombardare il motore durante lo spostamento.
+// La timeline è solo un indicatore di posizione.
+$("timeline").disabled=true;
+
+// Zoom/pan.
+$("zoomIn").onclick=()=>setZoom(zoom+0.25);
+$("zoomOut").onclick=()=>setZoom(zoom-0.25);
+$("zoomReset").onclick=resetView;
+
+$("canvasWrap").addEventListener("pointerdown",canvasPointerDown);
+$("canvasWrap").addEventListener("pointermove",canvasPointerMove);
+$("canvasWrap").addEventListener("pointerup",canvasPointerUp);
+$("canvasWrap").addEventListener("pointercancel",canvasPointerUp);
+$("canvasWrap").addEventListener("dblclick",canvasDoubleTap);
+
+$("canvasWrap").addEventListener("wheel",e=>{
+  e.preventDefault();
+  setZoom(zoom+(e.deltaY<0?0.25:-0.25));
+},{passive:false});
+
+updateZoomUI();
+</script>
+</body>
+</html>
