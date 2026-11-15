@@ -1,7 +1,7 @@
 {
-  "id": "./",
+  "id": "./?app=videolab-test",
   "name": "MAGem VideoLab v2.2.5 TEST PWA",
-  "short_name": "VideoLab",
+  "short_name": "VideoLab TEST",
   "description": "MAGem VideoLab Player v2.2.5 — copia PWA di test per Android.",
   "lang": "it",
   "start_url": "./",
