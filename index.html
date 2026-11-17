@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>MAGem VideoLab — Viewport dinamico TEST v0.1</title>
+<title>MAGem VideoLab Player v2.2.5 BASE STABILE</title>
 <style>
 :root{--bg:#0d0f12;--panel:#171a1f;--line:#3b4149;--text:#f2f3f5;--muted:#aeb5bf;--accent:#d9dce1}
 *{box-sizing:border-box}
@@ -186,7 +186,136 @@ input[type=number]{width:92px;background:#111418;color:#fff;border:1px solid #5d
   white-space:nowrap;
 }
 
+
+
+/* ==========================================================
+   MAGem VideoLab v2.2 TEST — landscape + portrait adattivo
+   ========================================================== */
+@media (orientation:landscape) and (max-height:600px){
+  html,body{width:100%;height:100%;height:100dvh;margin:0;overflow:hidden;overscroll-behavior:none}
+  header.header{
+    position:fixed;top:7px;left:8px;right:auto;z-index:50;
+    display:flex !important;align-items:center !important;gap:7px;
+    width:auto;min-height:0;padding:4px 6px;
+    background:rgba(8,10,14,.22);border:1px solid rgba(255,255,255,.16);
+    border-radius:10px;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+    transition:opacity .22s ease,transform .22s ease;
+  }
+  header.header h1{font-size:13px;line-height:1;margin:0;white-space:nowrap;text-shadow:0 1px 3px #000}
+  .headerFile{margin:0 !important}
+  .fileBtn,#fullscreenBtn{
+    min-height:27px;padding:3px 8px;font-size:11px;color:#fff;
+    background:rgba(10,13,18,.28);border:1px solid rgba(255,255,255,.35);
+    border-radius:7px;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+  }
+  #fullscreenBtn{cursor:pointer}
+  main{position:fixed;inset:0;width:100%;max-width:none;height:100%;height:100dvh;min-height:0;margin:0;padding:0;display:block;overflow:hidden}
+  .card.player{position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;border:0;border-radius:0;background:#000;overflow:hidden}
+  #canvasWrap{position:absolute;inset:0;width:100%;height:100%;min-height:0;max-height:none;flex:none;display:flex;align-items:center;justify-content:center;background:#000;overflow:hidden}
+  #canvas{width:100%;height:100%;min-height:0;object-fit:contain}
+  #frameOverlay{left:auto;right:9px;top:8px;bottom:auto;padding:3px 6px;font-size:11px;background:rgba(0,0,0,.30);border:1px solid rgba(255,255,255,.12)}
+  .controlsCard{position:fixed;inset:0;z-index:45;width:100%;height:100%;margin:0;padding:0;display:block;border:0;border-radius:0;background:transparent;box-shadow:none;pointer-events:none;transition:opacity .22s ease}
+  .timelineCompact{display:none}
+  .mainTransport,.speedTransport,.zoomTransport{position:absolute;display:flex;flex-direction:column;flex-wrap:nowrap;align-items:center;justify-content:center;gap:7px;margin:0;pointer-events:auto}
+  .mainTransport{left:9px;top:43%;transform:translateY(-50%)}
+  /* Le velocità passano in basso a sinistra, in riga: niente sovrapposizioni. */
+  .speedTransport{left:9px;right:auto;top:auto;bottom:10px;transform:none;flex-direction:row;gap:5px}
+  .zoomTransport{right:9px;top:50%;transform:translateY(-50%)}
+  .mainTransport button,.speedTransport button,.zoomTransport button{
+    min-width:43px;width:auto;min-height:39px;height:39px;margin:0;padding:5px 7px;
+    border:1px solid rgba(255,255,255,.38);border-radius:9px;
+    background:rgba(8,11,16,.27);color:#fff;font-size:12px;line-height:1;
+    text-shadow:0 1px 3px #000;box-shadow:0 1px 4px rgba(0,0,0,.18);
+    backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);white-space:nowrap;
+  }
+  /* Comandi principali più larghi: le etichette Frame non devono sbordare. */
+  .mainTransport button{width:68px;min-width:68px;min-height:42px;height:42px;padding:4px 5px;font-size:12px}
+  .speedTransport button{width:43px;min-width:43px}
+  .zoomTransport button{width:43px;min-width:43px}
+  .zoomTransport #zoomReadout{min-width:43px;width:43px;font-size:11px;text-align:center;text-shadow:0 1px 3px #000}
+  .zoomTransport #zoomReset{width:58px;min-width:58px;font-size:10px;padding:3px}
+  .controlsCard button.active{background:rgba(210,215,225,.48);border-color:rgba(255,255,255,.8)}
+  .controlsCard button.flash{background:rgba(150,160,175,.65)}
+  body.controlsHidden header.header{opacity:0;transform:translateY(-130%);pointer-events:none}
+  body.controlsHidden .controlsCard{opacity:0;pointer-events:none}
+}
+@media (orientation:landscape) and (max-height:380px){
+  .mainTransport{left:5px;gap:4px}.speedTransport{left:5px;bottom:5px;gap:3px}.zoomTransport{right:5px;gap:4px}
+  .mainTransport button,.speedTransport button,.zoomTransport button{height:33px;min-height:33px}
+  .mainTransport button{width:62px;min-width:62px;padding:3px 4px;font-size:11px}
+  .speedTransport button{width:39px;min-width:39px;padding:3px}
+}
+
+
+/* ==========================================================
+   MAGem VideoLab v2.2 TEST — interfaccia verticale adattiva
+   La modalità landscape v2.1d resta invariata.
+   ========================================================== */
+@media (orientation:portrait) and (max-width:600px){
+  html,body{width:100%;height:100%;height:100dvh;margin:0;overflow:hidden;overscroll-behavior:none}
+  header.header{
+    position:fixed;top:7px;left:8px;right:auto;z-index:50;
+    display:flex !important;align-items:center !important;gap:6px;
+    width:auto;min-height:0;max-width:calc(100vw - 16px);padding:4px 6px;
+    background:rgba(8,10,14,.24);border:1px solid rgba(255,255,255,.16);
+    border-radius:10px;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+    transition:opacity .22s ease,transform .22s ease;
+  }
+  header.header h1{font-size:12px;line-height:1;margin:0;white-space:nowrap;text-shadow:0 1px 3px #000}
+  .headerFile{margin:0 !important}
+  .fileBtn,#fullscreenBtn{
+    min-height:27px;padding:3px 7px;font-size:11px;color:#fff;
+    background:rgba(10,13,18,.28);border:1px solid rgba(255,255,255,.35);
+    border-radius:7px;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+  }
+  #fullscreenBtn{cursor:pointer}
+  main{position:fixed;inset:0;width:100%;max-width:none;height:100%;height:100dvh;min-height:0;margin:0;padding:0;display:block;overflow:hidden}
+  .card.player{position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;border:0;border-radius:0;background:#000;overflow:hidden}
+  #canvasWrap{position:absolute;inset:0;width:100%;height:100%;min-height:0;max-height:none;flex:none;display:flex;align-items:center;justify-content:center;background:#000;overflow:hidden}
+  #canvas{width:100%;height:100%;min-height:0;object-fit:contain}
+  #frameOverlay{left:auto;right:8px;top:8px;bottom:auto;padding:3px 6px;font-size:10px;background:rgba(0,0,0,.30);border:1px solid rgba(255,255,255,.12)}
+  .controlsCard{position:fixed;inset:0;z-index:45;width:100%;height:100%;margin:0;padding:0;display:block;border:0;border-radius:0;background:transparent;box-shadow:none;pointer-events:none;transition:opacity .22s ease}
+  .timelineCompact{display:none}
+  .mainTransport,.speedTransport,.zoomTransport{position:absolute;display:flex;flex-wrap:nowrap;align-items:center;justify-content:center;gap:5px;margin:0;pointer-events:auto}
+  /* Comandi principali: riga dedicata sopra le regolazioni. */
+  .mainTransport{left:50%;right:auto;top:auto;bottom:91px;transform:translateX(-50%);flex-direction:row}
+  .speedTransport{left:50%;right:auto;top:auto;bottom:49px;transform:translateX(-50%);flex-direction:row;gap:5px}
+  .zoomTransport{left:50%;right:auto;top:auto;bottom:7px;transform:translateX(-50%);flex-direction:row;gap:5px}
+  .mainTransport button,.speedTransport button,.zoomTransport button{
+    min-width:39px;width:auto;min-height:36px;height:36px;margin:0;padding:4px 6px;
+    border:1px solid rgba(255,255,255,.38);border-radius:9px;
+    background:rgba(8,11,16,.28);color:#fff;font-size:11px;line-height:1;
+    text-shadow:0 1px 3px #000;box-shadow:0 1px 4px rgba(0,0,0,.18);
+    backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);white-space:nowrap;
+  }
+  .mainTransport button{min-width:76px;padding:4px 7px}
+  .speedTransport button{width:43px;min-width:43px}
+  .zoomTransport button{width:39px;min-width:39px}
+  .zoomTransport #zoomReadout{min-width:43px;width:43px;font-size:11px;text-align:center;text-shadow:0 1px 3px #000}
+  .zoomTransport #zoomReset{width:59px;min-width:59px;font-size:10px;padding:3px}
+  .controlsCard button.active{background:rgba(210,215,225,.48);border-color:rgba(255,255,255,.8)}
+  .controlsCard button.flash{background:rgba(150,160,175,.65)}
+  body.controlsHidden header.header{opacity:0;transform:translateY(-130%);pointer-events:none}
+  body.controlsHidden .controlsCard{opacity:0;pointer-events:none}
+}
+@media (orientation:portrait) and (max-width:380px){
+  .mainTransport{bottom:87px;gap:4px}
+  .mainTransport button{min-width:70px;font-size:10px}
+  .speedTransport{bottom:46px;gap:4px}
+  .speedTransport button{width:40px;min-width:40px}
+  .zoomTransport{bottom:6px;gap:4px}
+  .zoomTransport button{width:36px;min-width:36px}
+  .zoomTransport #zoomReadout{width:39px;min-width:39px}
+  .zoomTransport #zoomReset{width:55px;min-width:55px}
+}
+
 </style>
+
+<meta name="theme-color" content="#0d0f12">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+
 </head>
 <body>
 <header class="header">
@@ -195,6 +324,7 @@ input[type=number]{width:92px;background:#111418;color:#fff;border:1px solid #5d
     <input id="file" type="file" accept="video/mp4,video/*">
     <label for="file" class="fileBtn">Scegli video</label>
   </div>
+  <button id="fullscreenBtn" type="button" title="Schermo intero">⛶</button>
 </header>
 
 <main>
@@ -255,10 +385,28 @@ input[type=number]{width:92px;background:#111418;color:#fff;border:1px solid #5d
 <script src="https://cdn.jsdelivr.net/npm/mp4box@0.5.2/dist/mp4box.all.min.js"></script>
 <script>
 "use strict";
+// v2.2.5 BASE STABILE: zoom canvas in portrait; zoom interno in landscape. 
 const $=id=>document.getElementById(id);
+
+const fullscreenButton=$("fullscreenBtn");
+if(fullscreenButton){
+  fullscreenButton.addEventListener("click",async()=>{
+    try{
+      if(!document.fullscreenElement && document.documentElement.requestFullscreen){
+        await document.documentElement.requestFullscreen();
+      }else if(document.fullscreenElement && document.exitFullscreen){
+        await document.exitFullscreen();
+      }
+    }catch(e){$("status").textContent="Schermo intero non disponibile in questo browser.";}
+  });
+}
 
 let fileObj=null,fileBuf=null,mp4=null,track=null,samples=[],timescale=0,total=0;
 let codec="",description=null,rotation=0,config=null;
+let presentationOrder=[];
+let sampleToPresentationMap=[];
+let pIndexToBitmap=new Map();
+let pIndexToSampleIndex=[];
 
 let decoder=null;
 let decodeCursor=-1;
@@ -271,7 +419,7 @@ let navigationResolve=null;
 // Stato della vista: indipendente dal decoder e dal buffer.
 let zoom=1, panX=0, panY=0, dragging=false, dragX=0, dragY=0, lastTap=0;
 
-const frameBuffer=new Map(); // frame index -> ImageBitmap
+const frameBuffer=new Map(); // pIndex -> ImageBitmap
 const outputPromises=new Map();
 
 const INITIAL_WINDOW=60;
@@ -288,6 +436,37 @@ let protectedFrame=null;
 
 const isSync=s=>typeof s.is_sync==="boolean"?s.is_sync:!!s.is_rap;
 const ts=s=>Math.round(Number(s.cts)*1e6/timescale);
+
+let landscapeHideTimer=null;
+function isCompactPlayer(){
+  return !!(window.matchMedia && (
+    window.matchMedia("(orientation:landscape) and (max-height:600px)").matches ||
+    window.matchMedia("(orientation:portrait) and (max-width:600px)").matches
+  ));
+}
+function showLandscapeControls(){
+  if(!isCompactPlayer())return;
+  document.body.classList.remove("controlsHidden");
+  clearTimeout(landscapeHideTimer);
+  if(playing){
+    landscapeHideTimer=setTimeout(()=>{
+      if(playing && isCompactPlayer())document.body.classList.add("controlsHidden");
+    },3200);
+  }
+}
+function hideLandscapeControlsSoon(){
+  if(!isCompactPlayer())return;
+  clearTimeout(landscapeHideTimer);
+  landscapeHideTimer=setTimeout(()=>{
+    if(playing && isCompactPlayer())document.body.classList.add("controlsHidden");
+  },3200);
+}
+
+document.addEventListener("pointerdown",showLandscapeControls,{passive:true});
+window.addEventListener("orientationchange",()=>{
+  document.body.classList.remove("controlsHidden");
+  clearTimeout(landscapeHideTimer);
+});
 
 function flash(b){b.classList.add("flash");setTimeout(()=>b.classList.remove("flash"),100)}
 function matrixValue(m,i){return Number(m?.[String(i)]??m?.[i])}
@@ -317,7 +496,7 @@ function sampleChunk(i){
 function update(n){
   current=n;
   $("current") && ($("current").textContent=n);
-  const seconds=ts(samples[n])/1e6;
+  const seconds=ts(presentationOrder[n])/1e6;
   $("time") && ($("time").textContent=seconds.toFixed(6)+" s");
   const tl=$("timeline");
   if(tl){
@@ -369,10 +548,33 @@ function drawBitmap(bitmap){
   const ctx=canvas.getContext("2d");
   ctx.clearRect(0,0,canvas.width,canvas.height);
   ctx.save();
-  ctx.translate(canvas.width/2+panX,canvas.height/2+panY);
+
+  // Il canvas resta fermo e occupa sempre il viewport.
+  // Zoom e pan vengono applicati ai pixel disegnati, non al rettangolo.
+  const wrap=$("canvasWrap");
+  // Scala effettiva con cui il canvas viene contenuto nel viewport
+  // (object-fit: contain). Convertiamo il pan da pixel schermo a
+  // coordinate interne del canvas usando lo stesso fattore su entrambi gli assi.
+  const fit=Math.min(
+    wrap.clientWidth/canvas.width,
+    wrap.clientHeight/canvas.height
+  ) || 1;
+  const portraitCanvasZoom = window.matchMedia &&
+    window.matchMedia("(orientation:portrait) and (max-width:600px)").matches;
+
+  // Portrait: lo zoom viene applicato al rettangolo canvas via CSS,
+  // così canvas e immagine crescono insieme. Landscape mantiene
+  // lo zoom interno già presente nella 2.2.3.
+  if(portraitCanvasZoom){
+    ctx.translate(canvas.width/2, canvas.height/2);
+  }else{
+    ctx.translate(canvas.width/2 + panX/fit, canvas.height/2 + panY/fit);
+    ctx.scale(zoom,zoom);
+  }
   ctx.rotate(rotation*Math.PI/180);
   ctx.drawImage(bitmap,-w/2,-h/2);
   ctx.restore();
+
   applyCanvasTransform();
   updateZoomUI();
 }
@@ -381,15 +583,24 @@ function updateZoomUI(){
   if(z)z.textContent=Math.round(zoom*100)+"%";
 }
 
-/* TEST v0.3 — viewport dinamico + zoom reale.
- * La BASE_STABILE resta invariata.
+/* TEST v0.4 — canvas zoom in portrait, contenuto zoom in landscape.
+ * Le versioni BASE_STABILE restano invariate.
  * Il viewport conserva il comportamento iniziale a 100%.
- * Con lo zoom cresce il viewport e il canvas viene ingrandito
- * via CSS, così il filmato occupa realmente più spazio.
+ * In portrait il canvas viene ingrandito via CSS insieme all'immagine.
+ * In landscape resta attivo lo zoom interno della versione 2.2.3.
  */
 function updateViewportForZoom(){
   const wrap=$("canvasWrap");
   if(!wrap)return;
+
+  // In landscape il viewport resta sempre esteso a tutta l'area disponibile.
+  // Lo zoom ingrandisce solo il canvas al suo interno: non deve ridurre o
+  // modificare l'altezza del rettangolo che lo contiene.
+  if(window.matchMedia && window.matchMedia("(orientation:landscape) and (max-height:600px)").matches){
+    wrap.style.height="100dvh";
+    wrap.style.maxHeight="none";
+    return;
+  }
 
   if(zoom<=1){
     wrap.style.height="58vh";
@@ -407,7 +618,18 @@ function updateViewportForZoom(){
 function applyCanvasTransform(){
   const canvas=$("canvas");
   if(!canvas)return;
-  canvas.style.transform=`translate(${panX}px, ${panY}px) scale(${zoom})`;
+
+  const portraitCanvasZoom = window.matchMedia &&
+    window.matchMedia("(orientation:portrait) and (max-width:600px)").matches;
+
+  if(portraitCanvasZoom){
+    // In portrait ingrandiamo il canvas completo, non soltanto i pixel
+    // disegnati al suo interno. Il pan resta espresso in pixel schermo.
+    canvas.style.transform=`translate(${panX}px, ${panY}px) scale(${zoom})`;
+  }else{
+    // In landscape conserviamo la gestione interna dello zoom della 2.2.3.
+    canvas.style.transform="none";
+  }
 }
 
 function resetView(){
@@ -428,10 +650,15 @@ function setZoom(next){
 function clampPan(){
   const c=$("canvas"),wrap=$("canvasWrap");
   if(!c||!wrap)return;
-  const w=c.offsetWidth*zoom;
-  const h=c.offsetHeight*zoom;
-  const maxX=Math.max(0,(w-wrap.clientWidth)/2);
-  const maxY=Math.max(0,(h-wrap.clientHeight)/2);
+
+  // Dimensioni effettive dell'immagine contenuta nel canvas,
+  // rapportate al viewport visibile.
+  const canvasW=c.width,canvasH=c.height;
+  const fit=Math.min(wrap.clientWidth/canvasW,wrap.clientHeight/canvasH);
+  const imageW=canvasW*fit*zoom;
+  const imageH=canvasH*fit*zoom;
+  const maxX=Math.max(0,(imageW-wrap.clientWidth)/2);
+  const maxY=Math.max(0,(imageH-wrap.clientHeight)/2);
   panX=Math.max(-maxX,Math.min(maxX,panX));
   panY=Math.max(-maxY,Math.min(maxY,panY));
 }
@@ -523,54 +750,56 @@ async function ensureDecoder(){
 }
 let tsToIndex=new Map();
 
-async function decodeRangeForward(end){
-  end=Math.min(end,total-1);
+async function decodeRangeForward(endP){
+  endP=Math.min(endP,total-1);
   if(decodeLock)await waitForDecodeIdle();
-  if(decodeCursor>=end)return;
+  const endS=pIndexToSampleIndex[endP];
+  if(decodeCursor>=endS)return;
   decodeLock=true;
   try{
     await ensureDecoder();
     const start=Math.max(0,decodeCursor+1);
-    for(let i=start;i<=end;i++){
-      decoder.decode(sampleChunk(i));
-      decodeCursor=i;
+    for(let sIndex=start;sIndex<=endS;sIndex++){
+      decoder.decode(sampleChunk(sIndex));
+      decodeCursor=sIndex;
     }
     // Give the decoder a short scheduling window; no flush.
     await new Promise(r=>setTimeout(r,0));
   }finally{decodeLock=false}
 }
-async function seekReset(target,end){
-  target=Math.max(0,Math.min(target,total-1));
-  end=Math.max(target,Math.min(end,total-1));
+async function seekReset(targetP,endP){
+  targetP=Math.max(0,Math.min(targetP,total-1));
+  endP=Math.max(targetP,Math.min(endP,total-1));
 
   await waitForDecodeIdle();
-
-  protectedFrame=target;
+  protectedFrame=targetP;
   closeDecoder();
   clearFrameBuffer();
   await ensureDecoder();
 
-  let start=target;
-  while(start>0&&!isSync(samples[start]))start--;
-
-  decodeCursor=start-1;
-  for(let i=start;i<=end;i++){
-    decoder.decode(sampleChunk(i));
-    decodeCursor=i;
+  const targetS=pIndexToSampleIndex[targetP];
+  let startS=targetS;
+  while(startS>0&&!isSync(samples[startS]))startS--;
+  const endS=pIndexToSampleIndex[endP];
+  decodeCursor=startS-1;
+  for(let sIndex=startS;sIndex<=endS;sIndex++){
+    decoder.decode(sampleChunk(sIndex));
+    decodeCursor=sIndex;
   }
-  await waitForFrame(target,10000);
+  await waitForFrame(targetP,10000);
 }
 async function prepareInitial(){
   clearFrameBuffer();
   closeDecoder();
   await ensureDecoder();
-  let end=Math.min(total-1,INITIAL_WINDOW);
-  let start=0;
-  while(start>0&&!isSync(samples[start]))start--;
-  decodeCursor=start-1;
-  for(let i=start;i<=end;i++){
-    decoder.decode(sampleChunk(i));
-    decodeCursor=i;
+  let endP=Math.min(total-1,INITIAL_WINDOW);
+  const endS=pIndexToSampleIndex[endP];
+  let startS=0;
+  while(startS>0&&!isSync(samples[startS]))startS--;
+  decodeCursor=startS-1;
+  for(let sIndex=startS;sIndex<=endS;sIndex++){
+    decoder.decode(sampleChunk(sIndex));
+    decodeCursor=sIndex;
   }
   await waitForFrame(0,10000);
   $("status").textContent=`Pronto: frame 0. Buffer iniziale in caricamento…`;
@@ -579,7 +808,8 @@ async function ensureAhead(target){
   target=Math.min(target,total-1);
   if(frameBuffer.has(target))return;
 
-  if(target>decodeCursor){
+  const targetS=pIndexToSampleIndex[target];
+  if(targetS>decodeCursor){
     await decodeRangeForward(Math.min(total-1,target+BACKFILL_SIZE));
     await waitForFrame(target,10000);
     return;
@@ -590,13 +820,15 @@ async function ensureAhead(target){
 async function maybeBackfill(){
   if(!samples.length||backfillBusy||decodeLock)return;
   const ahead=[];
-  for(let i=current+1;i<=Math.min(total-1,decodeCursor);i++){
-    if(frameBuffer.has(i))ahead.push(i);
+  const decodedMaxP=decodeCursor>=0&&decodeCursor<sampleToPresentationMap.length
+    ? sampleToPresentationMap[decodeCursor] : -1;
+  for(let p=current+1;p<=Math.min(total-1,decodedMaxP);p++){
+    if(frameBuffer.has(p))ahead.push(p);
   }
   if(ahead.length<=LOW_WATERMARK && decodeCursor<total-1){
     backfillBusy=true;
     try{
-      const end=Math.min(total-1,decodeCursor+BACKFILL_SIZE);
+      const end=Math.min(total-1,decodedMaxP+BACKFILL_SIZE);
       await decodeRangeForward(end);
     }finally{backfillBusy=false}
   }
@@ -693,12 +925,12 @@ async function playLoop(my){
   if(!playing||my!==playToken)return;
   const n=current<0?0:current+1;
   if(n>=total){
-    playing=false;$("play").textContent="▶ Play";$("status").textContent="Fine video.";return;
+    playing=false;$("play").textContent="▶ Play";$("status").textContent="Fine video.";showLandscapeControls();return;
   }
   const t0=performance.now();
   await showFrame(n);
   if(!playing||my!==playToken)return;
-  const mediaDelta=(ts(samples[n])-ts(samples[n-1]))/1000;
+  const mediaDelta=(ts(presentationOrder[n])-ts(presentationOrder[n-1]))/1000;
   const delay=Math.max(0,mediaDelta/speed-(performance.now()-t0));
   setTimeout(()=>playLoop(my),delay);
 }
@@ -807,15 +1039,31 @@ $("an").onclick=async()=>{
       const ok=await VideoDecoder.isConfigSupported(config);
       if(!ok.supported)throw Error("HEVC non supportato.");
       rotation=detectRotation(track);
+      // Costruiamo una separazione esplicita tra ordine di decodifica (sIndex/DTS)
+      // e ordine di presentazione (pIndex/CTS). Il decoder continua a ricevere
+      // i sample nell'ordine originale; il Player ragiona invece per pIndex.
+      presentationOrder=samples.map((s,sIndex)=>({
+        sIndex, cts:Number(s.cts), ctsMs:ts(s)/1e6, duration:Number(s.duration),
+        isKeyframe:isSync(s)
+      })).sort((a,b)=>(a.cts-b.cts)||(a.sIndex-b.sIndex))
+        .map((x,pIndex)=>({...x,pIndex}));
+      sampleToPresentationMap=new Array(total);
+      pIndexToSampleIndex=new Array(total);
+      for(const x of presentationOrder){
+        sampleToPresentationMap[x.sIndex]=x.pIndex;
+        pIndexToSampleIndex[x.pIndex]=x.sIndex;
+      }
+      // Timestamp CTS -> pIndex. In caso di collisione usiamo il primo indice;
+      // per questi file i CTS sono distinti.
       tsToIndex=new Map();
-      for(let i=0;i<samples.length;i++)tsToIndex.set(ts(samples[i]),i);
+      for(const x of presentationOrder)tsToIndex.set(ts(samples[x.sIndex]),x.pIndex);
 
       // Aggiorna i limiti temporali della timeline.
       // Il tempo non viene ricavato da un FPS presunto, ma dai PTS/CTS
       // reali dei sample MP4 già indicizzati.
       if(total){
-        const startSec=ts(samples[0])/1e6;
-        const endSec=ts(samples[total-1])/1e6;
+        const startSec=ts(presentationOrder[0])/1e6;
+        const endSec=ts(presentationOrder[total-1])/1e6;
         $("timeStart").textContent=startSec.toFixed(3)+" s";
         $("timeEnd").textContent=endSec.toFixed(3)+" s";
         $("timeCenter").textContent="Frame 0";
@@ -825,10 +1073,11 @@ $("an").onclick=async()=>{
         `File: ${file.name}\nCodec: ${vt.codec}\n`+
         `Risoluzione: ${config.codedWidth} × ${config.codedHeight}\n`+
         `Sample: ${total}\nTimescale: ${timescale}\n`+
-        `hvcC: ${description.byteLength} byte\nRotazione: ${rotation}°`;
+        `hvcC: ${description.byteLength} byte\nRotazione: ${rotation}°\nOrdine Player: CTS (pIndex) / Decoder: DTS (sIndex)`;
       await prepareInitial();
       $("status").textContent="Pronto. Usa Prev/Next per navigare; tieni premuto per accelerare.";
       await showFrame(0);
+      showLandscapeControls();
     };
     mp4.onError=e=>{$("status").textContent="MP4Box: "+e};
     mp4.appendBuffer(fileBuf);mp4.flush();
@@ -843,6 +1092,7 @@ $("play").onclick=async()=>{
     playing=false;playToken++;
     $("play").textContent="▶ Play";
     $("status").textContent="Pausa.";
+    showLandscapeControls();
     return;
   }
 
@@ -866,6 +1116,7 @@ $("play").onclick=async()=>{
   playToken++;
   $("play").textContent="❚❚ Pausa";
   $("status").textContent=`Play dal frame ${current}.`;
+  hideLandscapeControlsSoon();
   playLoop(playToken);
 };
 $("next").addEventListener("pointerdown",e=>{
@@ -910,7 +1161,19 @@ $("canvasWrap").addEventListener("wheel",e=>{
 },{passive:false});
 
 updateZoomUI();
+updateViewportForZoom();
 window.addEventListener("resize",updateViewportForZoom);
+window.addEventListener("orientationchange",updateViewportForZoom);
 </script>
+
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js", { scope: "./" })
+      .catch(error => console.warn("MAGem VideoLab: registrazione Service Worker non riuscita.", error));
+  });
+}
+</script>
+
 </body>
 </html>
