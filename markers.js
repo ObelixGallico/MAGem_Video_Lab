@@ -365,7 +365,7 @@
     const panel = document.createElement("section");
     panel.id = "markerPanel";
     panel.innerHTML = `
-      <div class="row" style="justify-content:space-between">
+     <div id="markerPanelHeader" class="row" style="justify-content:space-between">
         <h2>Marcatori del video</h2>
         <button id="closeMarkers" type="button">Chiudi</button>
       </div>
@@ -396,7 +396,59 @@
       <div id="markerList"></div>
     `;
     document.body.append(panel);
+// Trascinamento del pannello Marcatori con mouse o touch
+const panelHeader = $m("markerPanelHeader");
+let dragState = null;
 
+panelHeader.style.cursor = "move";
+panelHeader.style.touchAction = "none";
+panelHeader.style.userSelect = "none";
+
+panelHeader.addEventListener("pointerdown", event => {
+  // Il pulsante Chiudi deve continuare a funzionare normalmente
+  if (event.target.closest("button")) return;
+
+  const rect = panel.getBoundingClientRect();
+
+  dragState = {
+    offsetX: event.clientX - rect.left,
+    offsetY: event.clientY - rect.top
+  };
+
+  panel.style.left = rect.left + "px";
+  panel.style.top = rect.top + "px";
+  panel.style.right = "auto";
+
+  panelHeader.setPointerCapture(event.pointerId);
+  event.preventDefault();
+});
+
+panelHeader.addEventListener("pointermove", event => {
+  if (!dragState) return;
+
+  const maxLeft = window.innerWidth - panel.offsetWidth;
+  const maxTop = window.innerHeight - panel.offsetHeight;
+
+  const left = Math.max(0, Math.min(
+    event.clientX - dragState.offsetX,
+    maxLeft
+  ));
+
+  const top = Math.max(0, Math.min(
+    event.clientY - dragState.offsetY,
+    maxTop
+  ));
+
+  panel.style.left = left + "px";
+  panel.style.top = top + "px";
+});
+
+function stopPanelDrag() {
+  dragState = null;
+}
+
+panelHeader.addEventListener("pointerup", stopPanelDrag);
+panelHeader.addEventListener("pointercancel", stopPanelDrag);
     button.onclick = () => {
       panel.classList.toggle("open");
       render();
