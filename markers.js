@@ -445,8 +445,8 @@
 
     function setManagementOpen(open) {
       panel.classList.toggle("open", open);
-      markPrev.style.display = open ? "" : "none";
-      markNext.style.display = open ? "" : "none";
+      markPrev.style.display = open ? "inline-flex" : "none";
+      markNext.style.display = open ? "inline-flex" : "none";
 
       if (open) {
         render();
