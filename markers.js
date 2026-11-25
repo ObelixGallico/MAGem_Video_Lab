@@ -321,14 +321,23 @@
     const style = document.createElement("style");
     style.textContent = `
       #markerPanel {
-        display:none; position:fixed; z-index:80;
-        right:10px; top:52px;
-        width:min(430px,calc(100vw - 20px));
-        max-height:calc(100dvh - 65px); overflow:auto;
-        background:#171a1f; color:#f2f3f5;
-        border:1px solid #737b86; border-radius:12px;
-        padding:12px; box-shadow:0 8px 30px #000b;
-      }
+  display:none;
+  position:fixed;
+  z-index:80;
+  right:10px;
+  top:52px;
+  width:min(340px,calc(100vw - 20px));
+  max-height:55vh;
+  overflow-y:auto;
+  background:rgba(27,32,41,0.88);
+  color:#f2f3f5;
+  border:1px solid rgba(115,130,155,0.75);
+  border-radius:12px;
+  padding:9px;
+  box-shadow:0 8px 30px rgba(0,0,0,0.55);
+  backdrop-filter:blur(5px);
+  -webkit-backdrop-filter:blur(5px);
+}
       #markerPanel.open { display:block; }
       #markerPanel h2 { font-size:17px; margin:0 0 9px; }
       #markerPanel input[type=text],
